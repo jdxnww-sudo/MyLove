@@ -54,7 +54,6 @@
             color: #7d6b60;
         }
 
-        /* Стиль для твоей подсказки про любовь */
         .love-hint {
             font-size: 0.9rem;
             color: #a39087;
@@ -108,7 +107,7 @@
             transition: opacity 0.3s;
         }
 
-        /* КОНТЕЙНЕР ДЛЯ ПИСЬМА */
+        /* КОНТЕЙНЕР ДЛЯ ПИСЬМА И ВИДЕО */
         .envelope-container {
             position: relative;
             cursor: pointer;
@@ -118,22 +117,32 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            z-index: 1;
         }
 
-        /* Интерактивная подсказка над письмом */
-        .hint-text {
-            font-size: 1.1rem;
-            font-weight: 300;
-            letter-spacing: 2px;
-            color: #a39087;
-            margin-bottom: 30px;
-            animation: pulse 2s infinite ease-in-out;
-            text-transform: uppercase;
+        /* Стиль для круглого крутящегося видео */
+        .video-present {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%; /* Делаем круглым */
+            overflow: hidden;
+            border: 4px solid #ffffff;
+            box-shadow: 0 5px 20px rgba(217, 195, 188, 0.5);
+            margin-bottom: 20px; /* Отступ до конверта */
+            transition: transform 0.6s ease, opacity 0.6s ease;
+            z-index: 5;
+            animation: pulse 2s infinite ease-in-out; /* Легкая пульсация для привлечения внимания */
+        }
+
+        .video-present video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Чтобы видео полностью заполняло круг без искажений */
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 0.6; transform: translateY(0); }
-            50% { opacity: 1; transform: translateY(-4px); }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
         }
 
         /* Само письмо (Конверт) */
@@ -146,7 +155,6 @@
             box-shadow: 0 15px 35px rgba(217, 195, 188, 0.4);
         }
 
-        /* Верхний клапан конверта */
         .envelope::before {
             content: '';
             position: absolute;
@@ -162,7 +170,6 @@
             z-index: 3;
         }
 
-        /* Боковые стороны конверта */
         .envelope::after {
             content: '';
             position: absolute;
@@ -178,7 +185,6 @@
             z-index: 2;
         }
 
-        /* Бумага с текстом внутри */
         .letter {
             position: absolute;
             top: 5px;
@@ -228,31 +234,37 @@
             transition: opacity 0.6s ease 0.6s;
         }
 
-        .envelope-container.open .hint-text {
+        /* Скрываем видео после открытия письма */
+        .envelope-container.open .video-present {
             opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
+            transform: scale(0);
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
 
-    <!-- ЭКРАН С ПАРОЛЕМ -->
+    <audio id="bgMusic" src="music.mp3" loop></audio>
+
     <div class="password-screen" id="passwordScreen">
         <div class="password-box">
             <h2>Введите секретный код</h2>
-            <!-- Твоя новая подсказка -->
             <div class="love-hint">🤍</div>
-            
             <input type="text" id="passwordInput" placeholder="Мяу мяу" onkeydown="if(event.key === 'Enter') checkPassword()">
             <div class="error-message" id="errorMessage">Неверный код. Попробуй еще раз...</div>
             <button onclick="checkPassword()">Войти</button>
         </div>
     </div>
 
-    <!-- КОНТЕНТ С ПИСЬМОМ -->
     <div class="envelope-container" id="envelopeContainer" onclick="openLetter()">
-        <div class="hint-text">Нажми на меня</div>
+        
+        <div class="video-present">
+            <video autoplay loop muted playsinline>
+                <source src="video.mp4" type="video/mp4">
+                Ваш браузер не поддерживает видео.
+            </video>
+        </div>
+
         <div class="envelope">
             <div class="letter">
                 <div class="letter-text" id="loveText">
@@ -264,7 +276,6 @@
     </div>
 
     <script>
-        // Пароль: 250525
         const CORRECT_PASSWORD = "250525";
 
         function checkPassword() {
@@ -272,15 +283,19 @@
             const screen = document.getElementById('passwordScreen');
             const container = document.getElementById('envelopeContainer');
             const error = document.getElementById('errorMessage');
+            const music = document.getElementById('bgMusic');
 
             if (input === CORRECT_PASSWORD) {
+                // Запускаем музыку
+                music.play().catch(error => { console.log("Музыка заблокирована браузером:", error); });
+
+                // Убираем экран пароля
                 screen.style.opacity = '0';
                 screen.style.visibility = 'hidden';
                 
+                // Показываем письмо и видео
                 container.style.display = 'flex';
-                setTimeout(() => {
-                    container.style.opacity = '1';
-                }, 100);
+                setTimeout(() => { container.style.opacity = '1'; }, 100);
             } else {
                 error.style.opacity = '1';
                 document.getElementById('passwordInput').value = '';
@@ -289,7 +304,8 @@
 
         function openLetter() {
             const container = document.getElementById('envelopeContainer');
-            container.classList.add('open');
+            container.classList.add('open'); // Запускаем CSS-анимацию открытия
+            document.getElementById('bgMusic').play(); // Дублируем запуск музыки
         }
     </script>
 </body>
