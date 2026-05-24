@@ -17,6 +17,18 @@
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
             color: #5a4b41;
+            transition: background 4s ease-in-out;
+        }
+
+        /* Анимация для живого "дышащего" фона */
+        @keyframes gradientBg {
+            0% { background-color: #fcf8f7; }
+            50% { background-color: #f5eae6; }
+            100% { background-color: #fcf8f7; }
+        }
+
+        .animated-bg {
+            animation: gradientBg 8s infinite ease-in-out;
         }
 
         /* ЭКРАН ПАРОЛЯ */
@@ -75,10 +87,6 @@
             transition: border-color 0.3s;
             box-sizing: border-box;
             letter-spacing: 2px;
-        }
-
-        .password-box input:focus {
-            border-color: #c9b1a9;
         }
 
         .password-box button {
@@ -222,12 +230,18 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             transition: transform 0.8s ease, height 0.8s ease;
             z-index: 1;
-            overflow: hidden;
+            overflow-y: auto; /* Включаем прокрутку для мобилок, если контент вырастет */
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: center;
             text-align: center;
+        }
+
+        /* Скрываем полосу прокрутки в письме */
+        .letter::-webkit-scrollbar {
+            width: 0;
         }
 
         .letter-content {
@@ -294,6 +308,28 @@
             letter-spacing: 0.5px;
         }
 
+        /* Кнопка-сюрприз */
+        .surprise-btn {
+            margin-top: 15px;
+            padding: 8px 18px;
+            background-color: #ff4d6d;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 77, 109, 0.2);
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .surprise-btn:hover {
+            background-color: #ff758f;
+        }
+
+        .surprise-btn:active {
+            transform: scale(0.95);
+        }
+
         /* АНИМАЦИЯ ОТКРЫТИЯ */
         .envelope-container.open .envelope::before {
             transform: rotateX(180deg);
@@ -308,8 +344,8 @@
         }
 
         .envelope-container.open .letter {
-            transform: translateY(-165px);
-            height: 345px;
+            transform: translateY(-190px);
+            height: 385px;
             z-index: 4;
             box-shadow: 0 -5px 25px rgba(0,0,0,0.08);
         }
@@ -327,9 +363,9 @@
         /* ЯРКИЕ СЕРДЕЧКИ НА ФОНЕ */
         .heart-particle {
             position: absolute;
-            color: #ff4d6d; /* Насыщенный ярко-розовый цвет */
-            text-shadow: 0 2px 8px rgba(255, 77, 109, 0.4); /* Эффект легкого свечения */
-            pointer-events: auto; /* Разрешаем кликать по сердечкам */
+            color: #ff4d6d;
+            text-shadow: 0 2px 8px rgba(255, 77, 109, 0.4);
+            pointer-events: auto;
             z-index: 0;
             cursor: pointer;
             user-select: none;
@@ -342,9 +378,23 @@
             90% { opacity: 1; }
             100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
         }
+
+        /* КЛИК-ИСПРА (CLICK BURST) */
+        .burst-particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 999;
+            font-size: 14px;
+            animation: explode 0.6s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--mx), var(--my)) scale(0.3); opacity: 0; }
+        }
     </style>
 </head>
-<body>
+<body onclick="createBurst(event)">
 
     <audio id="bgMusic" src="music.mp3" loop></audio>
 
@@ -358,7 +408,7 @@
         </div>
     </div>
 
-    <div class="envelope-container" id="envelopeContainer" onclick="openLetter()">
+    <div class="envelope-container" id="envelopeContainer" onclick="openLetter(event)">
         
         <div class="video-present">
             <video autoplay loop muted playsinline>
@@ -383,7 +433,9 @@
                         Ты — мое самое уютное место в этом огромном мире. Каждая секунда с тобой наполняет сердце невероятным теплом и смыслом. Спасибо тебе за твою нежность, твой смех и за то, что ты есть. <br><br>🤍
                     </div>
 
-                    <div class="letter-footer">С любовью, навсегда</div>
+                    <div class="letter-footer">С любовью, навсегда<br><span style="font-family:'Georgia', serif; font-style:italic; font-weight:300; font-size:0.7rem; color:#a39087;">Con amore, per sempre</span></div>
+
+                    <button class="surprise-btn" id="surpriseBtn" onclick="triggerSalute(event)">Нажми, если любишь</button>
 
                 </div>
             </div>
@@ -410,7 +462,10 @@
                 container.style.display = 'flex';
                 setTimeout(() => { container.style.opacity = '1'; }, 100);
 
-                // Генерация ярких сердечек (интервал 350мс, чтобы их было чуть больше)
+                // Включаем живой фон
+                document.body.classList.add('animated-bg');
+
+                // Генерация ярких сердечек
                 heartInterval = setInterval(createHeart, 350);
                 
                 setInterval(updateCounter, 1000);
@@ -421,27 +476,27 @@
             }
         }
 
-        function openLetter() {
+        function openLetter(e) {
+            // Предотвращаем срабатывание клика по фону, если нажали на письмо
+            if(e) e.stopPropagation();
             document.getElementById('envelopeContainer').classList.add('open');
             document.getElementById('bgMusic').play();
         }
 
-        // Яркие кликабельные сердечки
+        // Яркие падающие сердечки
         function createHeart() {
             const heart = document.createElement('div');
             heart.classList.add('heart-particle');
             heart.innerHTML = '💖';
             heart.style.left = Math.random() * 95 + 'vw';
-            heart.style.animationDuration = Math.random() * 3 + 4 + 's'; // плавное падение 4-7 сек
-            heart.style.fontSize = Math.random() * 10 + 16 + 'px'; // размер 16px - 26px
+            heart.style.animationDuration = Math.random() * 3 + 4 + 's';
+            heart.style.fontSize = Math.random() * 10 + 16 + 'px';
             
-            // Эффект лопания при клике
             heart.addEventListener('click', (e) => {
-                e.stopPropagation(); // чтобы клик не открывал конверт заново
-                heart.style.transform = 'scale(1.5)';
-                heart.style.opacity = '0';
-                heart.style.transition = 'transform 0.2s, opacity 0.2s';
-                setTimeout(() => heart.remove(), 200);
+                e.stopPropagation();
+                // Лопание частицы
+                createBurstEffect(e.clientX, e.clientY);
+                heart.remove();
             });
 
             document.body.appendChild(heart);
@@ -451,6 +506,74 @@
             }, 7000);
         }
 
+        // Эффект разлетающихся искорок (Click Burst) по клику по фону
+        function createBurst(e) {
+            // Не создаем эффект поверх экрана пароля
+            if (document.getElementById('passwordScreen').style.visibility === 'hidden' || !document.getElementById('passwordScreen').style.visibility) {
+                createBurstEffect(e.clientX, e.clientY);
+            }
+        }
+
+        function createBurstEffect(x, y) {
+            const particlesCount = 8;
+            const icons = ['✨', '💖', '🤍', '🌸'];
+            for (let i = 0; i < particlesCount; i++) {
+                const p = document.createElement('div');
+                p.classList.add('burst-particle');
+                p.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+                p.style.left = x + 'px';
+                p.style.top = y + 'px';
+                
+                // Рандомное направление полета
+                const angle = (i / particlesCount) * Math.PI * 2 + (Math.random() * 0.5);
+                const distance = Math.random() * 60 + 40;
+                const mx = Math.cos(angle) * distance;
+                const my = Math.sin(angle) * distance;
+                
+                p.style.setProperty('--mx', mx + 'px');
+                p.style.setProperty('--my', my + 'px');
+                
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 600);
+            }
+        }
+
+        // Салют из сердец при нажатии кнопки сюрприза
+        function triggerSalute(e) {
+            e.stopPropagation();
+            const btn = document.getElementById('surpriseBtn');
+            btn.innerText = 'Я тоже тебя люблю! 🤍';
+            btn.style.backgroundColor = '#ff758f';
+
+            // Генерируем мощный взрыв сердец по всему экрану
+            for (let k = 0; k < 4; k++) {
+                setTimeout(() => {
+                    const rx = Math.random() * window.innerWidth;
+                    const ry = Math.random() * window.innerHeight;
+                    for (let i = 0; i < 12; i++) {
+                        const p = document.createElement('div');
+                        p.classList.add('burst-particle');
+                        p.innerHTML = Math.random() > 0.5 ? '💖' : '❤️';
+                        p.style.left = rx + 'px';
+                        p.style.top = ry + 'px';
+                        p.style.fontSize = '24px';
+                        
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = Math.random() * 120 + 80;
+                        const mx = Math.cos(angle) * distance;
+                        const my = Math.sin(angle) * distance;
+                        
+                        p.style.setProperty('--mx', mx + 'px');
+                        p.style.setProperty('--my', my + 'px');
+                        
+                        document.body.appendChild(p);
+                        setTimeout(() => p.remove(), 600);
+                    }
+                }, k * 250);
+            }
+        }
+
+        // Расчет времени отношений
         function updateCounter() {
             const startDate = new Date('2025-05-25T00:00:00');
             const now = new Date();
