@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You</title>
+    <style>
+        /* Общие изящные настройки */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #fcf8f7;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            color: #5a4b41;
+        }
+
+        /* ЭКРАН ПАРОЛЯ */
+        .password-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fcf8f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            transition: opacity 0.8s ease, visibility 0.8s;
+        }
+
+        .password-box {
+            text-align: center;
+            background: #ffffff;
+            padding: 40px 45px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(223, 204, 198, 0.3);
+            border: 1px solid rgba(223, 204, 198, 0.5);
+            max-width: 320px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .password-box h2 {
+            font-weight: 400;
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            letter-spacing: 0.5px;
+            color: #7d6b60;
+        }
+
+        /* Стиль для твоей подсказки про любовь */
+        .love-hint {
+            font-size: 0.9rem;
+            color: #a39087;
+            font-style: italic;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .password-box input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e1d4cf;
+            border-radius: 12px;
+            outline: none;
+            font-size: 1.1rem;
+            text-align: center;
+            color: #5a4b41;
+            background-color: #faf6f5;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+            letter-spacing: 2px;
+        }
+
+        .password-box input:focus {
+            border-color: #c9b1a9;
+        }
+
+        .password-box button {
+            margin-top: 20px;
+            padding: 12px 35px;
+            background-color: #d9c3bc;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: background-color 0.3s;
+        }
+
+        .password-box button:hover {
+            background-color: #c9b1a9;
+        }
+
+        .error-message {
+            color: #c97d7d;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            height: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* КОНТЕЙНЕР ДЛЯ ПИСЬМА */
+        .envelope-container {
+            position: relative;
+            cursor: pointer;
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Интерактивная подсказка над письмом */
+        .hint-text {
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #a39087;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite ease-in-out;
+            text-transform: uppercase;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-4px); }
+        }
+
+        /* Само письмо (Конверт) */
+        .envelope {
+            position: relative;
+            width: 280px;
+            height: 180px;
+            background: #ebdcd6;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 15px 35px rgba(217, 195, 188, 0.4);
+        }
+
+        /* Верхний клапан конверта */
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 140px solid transparent;
+            border-right: 140px solid transparent;
+            border-top: 100px solid #e2cfc7;
+            transform-origin: top;
+            transition: transform 0.6s ease 0.4s;
+            z-index: 3;
+        }
+
+        /* Боковые стороны конверта */
+        .envelope::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 140px solid #ebdcd6;
+            border-right: 140px solid #ebdcd6;
+            border-top: 90px solid transparent;
+            border-bottom: 90px solid #e6d4cd;
+            border-radius: 0 0 12px 12px;
+            z-index: 2;
+        }
+
+        /* Бумага с текстом внутри */
+        .letter {
+            position: absolute;
+            top: 5px;
+            left: 15px;
+            width: 250px;
+            height: 160px;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-sizing: border-box;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.8s ease, height 0.8s ease;
+            z-index: 1;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .letter-text {
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #4a3e36;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        /* АНИМАЦИЯ ОТКРЫТИЯ */
+        .envelope-container.open .envelope::before {
+            transform: rotateX(180deg);
+            z-index: 0;
+            transition: transform 0.6s ease, z-index 0s linear 0.4s;
+        }
+
+        .envelope-container.open .letter {
+            transform: translateY(-130px);
+            height: 290px;
+            z-index: 4;
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.08);
+        }
+
+        .envelope-container.open .letter-text {
+            opacity: 1;
+            transition: opacity 0.6s ease 0.6s;
+        }
+
+        .envelope-container.open .hint-text {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ЭКРАН С ПАРОЛЕМ -->
+    <div class="password-screen" id="passwordScreen">
+        <div class="password-box">
+            <h2>Введите секретную дату</h2>
+            <!-- Твоя новая подсказка -->
+            <div class="love-hint">Дата, когда наше "я" превратилось в "мы"... 🤍</div>
+            
+            <input type="text" id="passwordInput" placeholder="ДДММГГ" onkeydown="if(event.key === 'Enter') checkPassword()">
+            <div class="error-message" id="errorMessage">Неверная дата. Попробуй еще раз...</div>
+            <button onclick="checkPassword()">Войти</button>
+        </div>
+    </div>
+
+    <!-- КОНТЕНТ С ПИСЬМОМ -->
+    <div class="envelope-container" id="envelopeContainer" onclick="openLetter()">
+        <div class="hint-text">Нажми на меня</div>
+        <div class="envelope">
+            <div class="letter">
+                <div class="letter-text" id="loveText">
+                    25.05.25 — особенный день. <br><br>
+                    Ты — мое самое уютное место в этом огромном мире. Каждая секунда с тобой наполняет сердце невероятным теплом и смыслом. Спасибо тебе за твою нежность, твой смех и за то, что ты есть. <br><br>🤍
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Пароль: 250525
+        const CORRECT_PASSWORD = "250525";
+
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value.trim();
+            const screen = document.getElementById('passwordScreen');
+            const container = document.getElementById('envelopeContainer');
+            const error = document.getElementById('errorMessage');
+
+            if (input === CORRECT_PASSWORD) {
+                screen.style.opacity = '0';
+                screen.style.visibility = 'hidden';
+                
+                container.style.display = 'flex';
+                setTimeout(() => {
+                    container.style.opacity = '1';
+                }, 100);
+            } else {
+                error.style.opacity = '1';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        function openLetter() {
+            const container = document.getElementById('envelopeContainer');
+            container.classList.add('open');
+        }
+    </script>
+</body>
+</html>
