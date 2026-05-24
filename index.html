@@ -192,10 +192,10 @@
             left: 125px;
             width: 30px;
             height: 30px;
-            background-color: #c97d7d;
+            background-color: #ff5e7e;
             border-radius: 50%;
             z-index: 4;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             transition: opacity 0.4s ease, transform 0.4s ease;
             display: flex;
             justify-content: center;
@@ -252,7 +252,7 @@
         .timer-container {
             display: flex;
             gap: 6px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             background: #faf6f5;
             padding: 6px 10px;
             border-radius: 8px;
@@ -286,6 +286,14 @@
             color: #4a3e36;
         }
 
+        .letter-footer {
+            font-size: 0.75rem;
+            color: #ff5e7e;
+            margin-top: 15px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
         /* АНИМАЦИЯ ОТКРЫТИЯ */
         .envelope-container.open .envelope::before {
             transform: rotateX(180deg);
@@ -300,8 +308,8 @@
         }
 
         .envelope-container.open .letter {
-            transform: translateY(-150px);
-            height: 320px;
+            transform: translateY(-165px);
+            height: 345px;
             z-index: 4;
             box-shadow: 0 -5px 25px rgba(0,0,0,0.08);
         }
@@ -316,18 +324,20 @@
             pointer-events: none;
         }
 
-        /* СЕРДЕЧКИ НА ФОНЕ */
+        /* ЯРКИЕ СЕРДЕЧКИ НА ФОНЕ */
         .heart-particle {
             position: absolute;
-            color: rgba(201, 125, 125, 0.25);
-            font-size: 16px;
-            pointer-events: none;
+            color: #ff4d6d; /* Насыщенный ярко-розовый цвет */
+            text-shadow: 0 2px 8px rgba(255, 77, 109, 0.4); /* Эффект легкого свечения */
+            pointer-events: auto; /* Разрешаем кликать по сердечкам */
             z-index: 0;
+            cursor: pointer;
+            user-select: none;
             animation: fall linear forwards;
         }
 
         @keyframes fall {
-            0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
+            0% { transform: translateY(-30px) rotate(0deg); opacity: 0; }
             10% { opacity: 1; }
             90% { opacity: 1; }
             100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
@@ -340,10 +350,10 @@
 
     <div class="password-screen" id="passwordScreen">
         <div class="password-box">
-            <h2>Введите секретную дату</h2>
-            <div class="love-hint">Дата, когда наше "я" превратилось в "мы"... 🤍</div>
-            <input type="text" id="passwordInput" placeholder="ДДММГГ" onkeydown="if(event.key === 'Enter') checkPassword()">
-            <div class="error-message" id="errorMessage">Неверная дата. Попробуй еще раз...</div>
+            <h2>Введите секретный код</h2>
+            <div class="love-hint">🤍</div>
+            <input type="text" id="passwordInput" placeholder="Мяу мяу" onkeydown="if(event.key === 'Enter') checkPassword()">
+            <div class="error-message" id="errorMessage">Неверный код. Попробуй еще раз...</div>
             <button onclick="checkPassword()">Войти</button>
         </div>
     </div>
@@ -373,6 +383,8 @@
                         Ты — мое самое уютное место в этом огромном мире. Каждая секунда с тобой наполняет сердце невероятным теплом и смыслом. Спасибо тебе за твою нежность, твой смех и за то, что ты есть. <br><br>🤍
                     </div>
 
+                    <div class="letter-footer">С любовью, навсегда</div>
+
                 </div>
             </div>
         </div>
@@ -398,9 +410,9 @@
                 container.style.display = 'flex';
                 setTimeout(() => { container.style.opacity = '1'; }, 100);
 
-                // Запуск генерации падающих сердечек
-                heartInterval = setInterval(createHeart, 400);
-                // Запуск счётчика времени
+                // Генерация ярких сердечек (интервал 350мс, чтобы их было чуть больше)
+                heartInterval = setInterval(createHeart, 350);
+                
                 setInterval(updateCounter, 1000);
                 updateCounter();
             } else {
@@ -414,24 +426,32 @@
             document.getElementById('bgMusic').play();
         }
 
-        // Функция создания падающих сердечек
+        // Яркие кликабельные сердечки
         function createHeart() {
             const heart = document.createElement('div');
             heart.classList.add('heart-particle');
-            heart.innerHTML = '🤍';
-            heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.animationDuration = Math.random() * 3 + 3 + 's'; // от 3 до 6 секунд
-            heart.style.fontSize = Math.random() * 12 + 12 + 'px'; // размер от 12px до 24px
+            heart.innerHTML = '💖';
+            heart.style.left = Math.random() * 95 + 'vw';
+            heart.style.animationDuration = Math.random() * 3 + 4 + 's'; // плавное падение 4-7 сек
+            heart.style.fontSize = Math.random() * 10 + 16 + 'px'; // размер 16px - 26px
+            
+            // Эффект лопания при клике
+            heart.addEventListener('click', (e) => {
+                e.stopPropagation(); // чтобы клик не открывал конверт заново
+                heart.style.transform = 'scale(1.5)';
+                heart.style.opacity = '0';
+                heart.style.transition = 'transform 0.2s, opacity 0.2s';
+                setTimeout(() => heart.remove(), 200);
+            });
+
             document.body.appendChild(heart);
 
             setTimeout(() => {
-                heart.remove();
-            }, 6000);
+                if(heart.parentNode) heart.remove();
+            }, 7000);
         }
 
-        // Функция расчета времени отношений
         function updateCounter() {
-            // Дата начала отношений: 25 мая 2025 года
             const startDate = new Date('2025-05-25T00:00:00');
             const now = new Date();
             const diff = now - startDate;
