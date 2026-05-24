@@ -776,10 +776,10 @@
 
         // Таймер отношений по МСК
         function updateCounter() {
-            const startDate = new Date('2025-05-25T00:00:00+04:00');
+            const startDate = new Date('2025-05-25T00:00:00+03:00');
             
             const nowLocal = new Date();
-            const moscowOffset = 4 * 60 * 60 * 1000;
+            const moscowOffset = 3 * 60 * 60 * 1000;
             const utc = nowLocal.getTime() + (nowLocal.getTimezoneOffset() * 60000);
             const nowMoscow = new Date(utc + moscowOffset);
 
